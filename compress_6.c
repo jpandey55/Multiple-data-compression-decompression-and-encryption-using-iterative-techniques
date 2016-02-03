@@ -1,0 +1,173 @@
+#include"header.h"
+#include"prototype.h"
+
+int compress_6(int fd,char *ma,char * argv)
+{
+	char * temp_name;
+	int cf,j=1,i,k,n=1,chek=0;
+	char ch;
+	unsigned char c,byt,temp1,temp2,ctemp[3],temp3;
+	temp_name=(char *)malloc(24);
+	strcpy(temp_name,argv);
+	strcat(temp_name,"_comp");
+	cf=open(temp_name,O_WRONLY|O_CREAT,0666);
+	lseek(fd,0,SEEK_SET);
+	byt=byt^byt;
+	while(read(fd,&ch,1))
+	{	
+		chek=0;
+		for(k=0;k<3;k++)
+			ctemp[k]=ctemp[k]^ctemp[k];
+		k=0;
+		c=c^c;
+		for(i=0;*(ma+i)!=ch;i++);
+		do
+		{
+			sprintf(&ctemp[k],"%d",(int)i%10);
+			ctemp[k]=ctemp[k]-48;
+			k++;
+
+			i=i/10;			
+		}while(i);
+		c=ctemp[2]*100+ctemp[1]*10+ctemp[0];
+		if(!read(fd,&ch,1))
+		{
+			lseek(fd,1,SEEK_CUR);
+			chek=1;
+		}
+		lseek(fd,-1,SEEK_CUR);
+		if(n%3==1)
+		{
+			if(j%2==1)
+			{
+				temp1=c;
+				temp1=temp1<<2;
+				byt=byt|temp1;
+				if(chek)
+				{
+					k=0;	
+					i=63;
+					do
+					{
+						sprintf(&ctemp[k],"%d",(int)i%10);
+						ctemp[k]=ctemp[k]-48;
+						k++;
+		
+						i=i/10;			
+					}while(i);
+					c=ctemp[2]*100+ctemp[1]*10+ctemp[0];
+					temp1=c;
+					temp1=temp1<<2;
+					temp1=temp1>>6;
+					byt=byt|temp1;
+					write(cf,&byt,1);
+					byt=byt^byt;
+					temp1=c;
+					temp1=temp1>>2;
+					temp1=temp1<<4;
+					write(cf,&temp1,1);
+					break;
+					
+				}
+			temp1=c;
+			}
+			else
+			{
+				temp2=c;
+				temp1=temp1<<2;
+				temp1=temp1>>6;
+				byt=byt|temp1;
+				print_bit(byt);
+				write(cf,&byt,1);
+				byt=byt^byt;
+				if(chek)
+				{
+					temp1=temp2;
+					temp1=temp1<<4;
+					k=0;	
+					i=63;
+					do
+					{
+						sprintf(&ctemp[k],"%d",(int)i%10);
+						ctemp[k]=ctemp[k]-48;
+						k++;
+		
+						i=i/10;			
+					}while(i);
+					c=ctemp[2]*100+ctemp[1]*10+ctemp[0];
+					temp3=c;
+					temp3=temp3<<2;
+					temp3=temp3>>4;
+					temp1=temp1|temp3;
+					write(cf,&temp1,1);
+					temp1=c;
+					temp1=temp1<<6;
+					write(cf,&temp1,1);
+					break;
+					
+				}
+				n++;
+			}
+		j++;
+		}
+		else if(n%3==2)
+		{
+			if(j%2==1)
+			{
+				temp2=temp2<<4;
+				temp1=c;
+				temp1=temp1<<2;
+				temp1=temp1>>4;
+				temp1=temp1|temp2;
+				print_bit(temp1);
+				write(cf,&temp1,1);
+				temp1=temp1^temp1;
+				if(chek)
+				{
+					temp1=c;
+					temp1=temp1<<6;
+					k=0;	
+					i=63;
+					do
+					{
+						sprintf(&ctemp[k],"%d",(int)i%10);
+						ctemp[k]=ctemp[k]-48;
+						k++;
+		
+						i=i/10;			
+					}while(i);
+					c=ctemp[2]*100+ctemp[1]*10+ctemp[0];
+					temp2=c;
+					temp2=temp2<<2;
+					temp2=temp2>>2;
+					temp1=temp1|temp2;
+					write(cf,&temp1,1);
+					break;
+					
+				}
+				temp1=c;
+				n++;
+				j++;
+			}
+		j++;
+		}
+		else
+		{
+			if(j%2==1)
+			{
+				temp1=temp1<<6;
+				temp2=c;
+				temp2=temp2<<2;
+				temp2=temp2>>2;
+				temp1=temp1|temp2;
+				print_bit(temp1);
+				write(cf,&temp1,1);
+				temp1=temp1^temp1;
+				j++;
+				n++;
+			}
+		j++;
+		}
+	}
+	return 0;
+}
